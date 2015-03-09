@@ -1,0 +1,7 @@
+<label for="subjectInput">Who are you?</label>
+<input type="text" can-value='{subject}' can-change='{checkVisibility}' placeholder="Enter your Name"> 
+{{#if isSubjectValid}}
+<h1 can-click='{changeSalutation}'>{{salutation}} {{subject}}</h1> 
+{{else}}
+<h1>Please Enter your Name</h1>
+{{/if}}
