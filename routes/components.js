@@ -8,7 +8,7 @@ router.get('/helloWorld', function(req, res, next) {
 });
 
 router.get('/todoApp', function(req, res, next){
-  res.render('components/helloWorld.html', {
+  res.render('components/todoApp.html', {
     title: "Todo App"
   });
 });

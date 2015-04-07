@@ -1,0 +1,11 @@
+<form class="form-inline" {{data 'todo'}} {{_data}}>
+  <div class="form-group">
+    <label for="todoDescriptionInput">Description</label>
+    <input type="text" id="todoDescriptionInput" can-value='{todo.description}' placeholder="Enter Description">
+  </div>
+  <div class="checkbox">
+    <label for="todoStatusInput">Completed?</label>
+    <input type="checkbox" id="todoStatusInput" can-value='{todo.isCompleted}'>
+  </div>
+  <button can-click='{createTodo}' class="btn btn-success">Create Todo</button>
+</form>

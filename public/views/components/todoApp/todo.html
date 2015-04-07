@@ -1,0 +1,18 @@
+<tr>
+  <input type="hidden" class="todoId" value="{{id}}" {{data 'todo'}} {{_data}}>
+  <td>
+    <div class="form-group">
+      <input type="checkbox" class="todoCompleted" can-value="completed" value="{{completed}}">
+    </div>
+  </td>
+  <td>
+    <div class="form-group">
+      <input type="text" can-value="description" value="{{description}}" class="todoDescription" placeholder="Edit Description">
+    </div>
+  </td>
+  <td>
+    <div class="form-group">
+      <button class="btn btn-default btn-danger todoDestroy">Remove</button>
+    </div>
+  </td>
+</tr>

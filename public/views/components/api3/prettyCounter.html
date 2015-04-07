@@ -1,0 +1,14 @@
+<div class="col-md-4">
+  <hr/>
+  <ul class="list-group">
+    {{#each numbers}}
+    <li class="list-group-item" can-click='{add}'>
+      {{.}}
+    </li>
+    {{/each}}
+  </ul>
+</div>
+<div class="col-md-8">
+  <hr/>
+  <h1>Total: {{prettyDisplay}}</h1>
+</div>

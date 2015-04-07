@@ -6,10 +6,10 @@ $(function() {
     scope: {
       salutation: "Hello",
       subject: "",
-      isSubjectValid: function(context, el, ev){
+      isSubjectValid: function(context, el, ev) {
         return this.attr("subject");
       },
-      checkVisibility: function(context, el, ev){
+      checkVisibility: function(context, el, ev) {
         // if(this.attr("subject")) {
         //   el.closest("div").find("h1").removeClass("hidden")
         // } else {
@@ -23,8 +23,10 @@ $(function() {
           this.attr("salutation", "Hello");
         }
       }
-    },
-    events: {}
+    }
   });
-  $("#out").html(can.view('/views/components/helloWorld/out.html'));
+
+  can.view('/views/components/helloWorld/out.html', {}, function(fragment) {
+    $("#out").html(fragment);
+  });
 });

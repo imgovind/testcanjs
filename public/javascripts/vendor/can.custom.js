@@ -2,10 +2,10 @@
  * CanJS - 2.1.4
  * http://canjs.us/
  * Copyright (c) 2015 Bitovi
- * Mon, 09 Mar 2015 04:04:51 GMT
+ * Thu, 12 Mar 2015 06:17:58 GMT
  * Licensed MIT
- * Includes: can/component/component.js,can/construct/construct.js,can/map/map.js,can/list/list.js,can/compute/compute.js,can/model/model.js,can/view/view.js,can/control/control.js,can/route/route.js,can/control/route/route.js,can/view/mustache/mustache.js,can/list/promise/promise.js,can/view/stache/stache.js,can/route/pushstate/pushstate.js,can/model/queue/queue.js,can/construct/super/super.js,can/map/validations/validations.js,can/map/backup/backup.js,can/map/list/list.js,can/map/sort/sort.js,can/util/object/object.js,can/util/fixture/fixture.js
- * Download from: http://bitbuilder.herokuapp.com/can.custom.js?configuration=jquery&plugins=can%2Fcomponent%2Fcomponent.js&plugins=can%2Fconstruct%2Fconstruct.js&plugins=can%2Fmap%2Fmap.js&plugins=can%2Flist%2Flist.js&plugins=can%2Fcompute%2Fcompute.js&plugins=can%2Fmodel%2Fmodel.js&plugins=can%2Fview%2Fview.js&plugins=can%2Fcontrol%2Fcontrol.js&plugins=can%2Froute%2Froute.js&plugins=can%2Fcontrol%2Froute%2Froute.js&plugins=can%2Fview%2Fmustache%2Fmustache.js&plugins=can%2Flist%2Fpromise%2Fpromise.js&plugins=can%2Fview%2Fstache%2Fstache.js&plugins=can%2Froute%2Fpushstate%2Fpushstate.js&plugins=can%2Fmodel%2Fqueue%2Fqueue.js&plugins=can%2Fconstruct%2Fsuper%2Fsuper.js&plugins=can%2Fmap%2Fvalidations%2Fvalidations.js&plugins=can%2Fmap%2Fbackup%2Fbackup.js&plugins=can%2Fmap%2Flist%2Flist.js&plugins=can%2Fmap%2Fsort%2Fsort.js&plugins=can%2Futil%2Fobject%2Fobject.js&plugins=can%2Futil%2Ffixture%2Ffixture.js
+ * Includes: can/component/component.js,can/construct/construct.js,can/map/map.js,can/list/list.js,can/compute/compute.js,can/model/model.js,can/view/view.js,can/control/control.js,can/route/route.js,can/control/route/route.js,can/view/mustache/mustache.js,can/list/promise/promise.js,can/view/ejs/ejs.js,can/view/stache/stache.js,can/route/pushstate/pushstate.js,can/model/queue/queue.js,can/construct/super/super.js,can/construct/proxy/proxy.js,can/map/lazy/lazy.js,can/map/delegate/delegate.js,can/map/setter/setter.js,can/map/attributes/attributes.js,can/map/validations/validations.js,can/map/backup/backup.js,can/map/list/list.js,can/map/define/define.js,can/map/sort/sort.js,can/control/plugin/plugin.js,can/view/modifiers/modifiers.js,can/util/object/object.js,can/util/fixture/fixture.js
+ * Download from: http://bitbuilder.herokuapp.com/can.custom.js?configuration=jquery&plugins=can%2Fcomponent%2Fcomponent.js&plugins=can%2Fconstruct%2Fconstruct.js&plugins=can%2Fmap%2Fmap.js&plugins=can%2Flist%2Flist.js&plugins=can%2Fcompute%2Fcompute.js&plugins=can%2Fmodel%2Fmodel.js&plugins=can%2Fview%2Fview.js&plugins=can%2Fcontrol%2Fcontrol.js&plugins=can%2Froute%2Froute.js&plugins=can%2Fcontrol%2Froute%2Froute.js&plugins=can%2Fview%2Fmustache%2Fmustache.js&plugins=can%2Flist%2Fpromise%2Fpromise.js&plugins=can%2Fview%2Fejs%2Fejs.js&plugins=can%2Fview%2Fstache%2Fstache.js&plugins=can%2Froute%2Fpushstate%2Fpushstate.js&plugins=can%2Fmodel%2Fqueue%2Fqueue.js&plugins=can%2Fconstruct%2Fsuper%2Fsuper.js&plugins=can%2Fconstruct%2Fproxy%2Fproxy.js&plugins=can%2Fmap%2Flazy%2Flazy.js&plugins=can%2Fmap%2Fdelegate%2Fdelegate.js&plugins=can%2Fmap%2Fsetter%2Fsetter.js&plugins=can%2Fmap%2Fattributes%2Fattributes.js&plugins=can%2Fmap%2Fvalidations%2Fvalidations.js&plugins=can%2Fmap%2Fbackup%2Fbackup.js&plugins=can%2Fmap%2Flist%2Flist.js&plugins=can%2Fmap%2Fdefine%2Fdefine.js&plugins=can%2Fmap%2Fsort%2Fsort.js&plugins=can%2Fcontrol%2Fplugin%2Fplugin.js&plugins=can%2Fview%2Fmodifiers%2Fmodifiers.js&plugins=can%2Futil%2Fobject%2Fobject.js&plugins=can%2Futil%2Ffixture%2Ffixture.js
  */
 (function(undefined) {
 
@@ -9301,8 +9301,192 @@
             });
     })(__m19);
 
+    // ## can/view/ejs/ejs.js
+    var __m35 = (function(can) {
+        // ## Helper methods
+        var extend = can.extend,
+            EJS = function(options) {
+                // Supports calling EJS without the constructor.
+                // This returns a function that renders the template.
+                if (this.constructor !== EJS) {
+                    var ejs = new EJS(options);
+                    return function(data, helpers) {
+                        return ejs.render(data, helpers);
+                    };
+                }
+                // If we get a `function` directly, it probably is coming from
+                // a `steal`-packaged view.
+                if (typeof options === 'function') {
+                    this.template = {
+                        fn: options
+                    };
+                    return;
+                }
+                // Set options on self.
+                extend(this, options);
+                this.template = this.scanner.scan(this.text, this.name);
+            };
+        // Expose EJS via the `can` object.
+        can.EJS = EJS;
+
+        EJS.prototype.
+        // ## Render
+        // Render a view object with data and helpers.
+        render = function(object, extraHelpers) {
+            object = object || {};
+            return this.template.fn.call(object, object, new EJS.Helpers(object, extraHelpers || {}));
+        };
+        extend(EJS.prototype, {
+                // ## Scanner
+                // Singleton scanner instance for parsing templates. See [scanner.js](scanner.html)
+                // for more information.
+                // ### Text
+                // #### Definitions
+                // * `outStart` - Wrapper start text for view function.
+                // * `outEnd` - Wrapper end text for view function.
+                // * `argNames` - Arguments passed into view function.
+                scanner: new can.view.Scanner({
+                        text: {
+                            outStart: 'with(_VIEW) { with (_CONTEXT) {',
+                            outEnd: "}}",
+                            argNames: '_CONTEXT,_VIEW',
+                            context: "this"
+                        },
+                        // ### Tokens
+                        // An ordered token registry for the scanner. Scanner makes evaluations
+                        // based on which tags are considered opening/closing as well as escaped, etc.
+                        tokens: [
+                            ["templateLeft", "<%%"],
+                            ["templateRight", "%>"],
+                            ["returnLeft", "<%=="],
+                            ["escapeLeft", "<%="],
+                            ["commentLeft", "<%#"],
+                            ["left", "<%"],
+                            ["right", "%>"],
+                            ["returnRight", "%>"]
+                        ],
+                        // ### Helpers
+                        helpers: [{
+                                // Regex to see if its a func like `()->`.
+                                name: /\s*\(([\$\w]+)\)\s*->([^\n]*)/,
+                                // Evaluate rocket syntax function with correct context.
+                                fn: function(content) {
+                                    var quickFunc = /\s*\(([\$\w]+)\)\s*->([^\n]*)/,
+                                        parts = content.match(quickFunc);
+
+                                    return "can.proxy(function(__){var " + parts[1] + "=can.$(__);" + parts[2] + "}, this);";
+                                }
+                            }
+                        ],
+                        // ### transform
+                        // Transforms the EJS template to add support for shared blocks.
+                        // Essentially, this breaks up EJS tags into multiple EJS tags
+                        // if they contained unmatched brackets.
+                        // For example, this doesn't work:
+                        // `<% if (1) { %><% if (1) { %> hi <% } } %>`
+                        // ...without isolated EJS blocks:
+                        // `<% if (1) { %><% if (1) { %> hi <% } %><% } %>`
+                        // The result of transforming:
+                        // `<% if (1) { %><% %><% if (1) { %><% %> hi <% } %><% } %>`
+                        transform: function(source) {
+                            return source.replace(/<%([\s\S]+?)%>/gm, function(whole, part) {
+                                var brackets = [],
+                                    foundBracketPair, i;
+                                // Look for brackets (for removing self-contained blocks)
+                                part.replace(/[{}]/gm, function(bracket, offset) {
+                                    brackets.push([
+                                            bracket,
+                                            offset
+                                        ]);
+                                });
+                                // Remove bracket pairs from the list of replacements
+                                do {
+                                    foundBracketPair = false;
+                                    for (i = brackets.length - 2; i >= 0; i--) {
+                                        if (brackets[i][0] === '{' && brackets[i + 1][0] === '}') {
+                                            brackets.splice(i, 2);
+                                            foundBracketPair = true;
+                                            break;
+                                        }
+                                    }
+                                } while (foundBracketPair);
+                                // Unmatched brackets found, inject EJS tags
+                                if (brackets.length >= 2) {
+                                    var result = ['<%'],
+                                        bracket, last = 0;
+                                    for (i = 0; bracket = brackets[i]; i++) {
+                                        result.push(part.substring(last, last = bracket[1]));
+                                        if (bracket[0] === '{' && i < brackets.length - 1 || bracket[0] === '}' && i > 0) {
+                                            result.push(bracket[0] === '{' ? '{ %><% ' : ' %><% }');
+                                        } else {
+                                            result.push(bracket[0]);
+                                        }
+                                        ++last;
+                                    }
+                                    result.push(part.substring(last), '%>');
+                                    return result.join('');
+                                }
+                                // Otherwise return the original
+                                else {
+                                    return '<%' + part + '%>';
+                                }
+                            });
+                        }
+                    })
+            });
+
+        // ## Helpers
+        // In your EJS view you can then call the helper on an element tag:
+        // `<div <%= upperHtml('javascriptmvc') %>></div>`
+        EJS.Helpers = function(data, extras) {
+            this._data = data;
+            this._extras = extras;
+            extend(this, extras);
+        };
+
+        EJS.Helpers.prototype = {
+            // List allows for live binding a can.List easily within a template.
+            list: function(list, cb) {
+                can.each(list, function(item, i) {
+                    cb(item, i, list);
+                });
+            },
+            // `each` iterates through a enumerated source(such as can.List or array)
+            // and sets up live binding when possible.
+            each: function(list, cb) {
+                // Normal arrays don't get live updated
+                if (can.isArray(list)) {
+                    this.list(list, cb);
+                } else {
+                    can.view.lists(list, cb);
+                }
+            }
+        };
+        // Registers options for a `steal` build.
+        can.view.register({
+                suffix: 'ejs',
+                script: function(id, src) {
+                    return 'can.EJS(function(_CONTEXT,_VIEW) { ' + new EJS({
+                            text: src,
+                            name: id
+                        })
+                        .template.out + ' })';
+                },
+                renderer: function(id, text) {
+                    return EJS({
+                            text: text,
+                            name: id
+                        });
+                }
+            });
+        can.ejs.Helpers = EJS.Helpers;
+
+
+        return can;
+    })(__m2, __m10, __m13, __m20, __m23, __m25);
+
     // ## can/view/target/target.js
-    var __m36 = (function(can, elements) {
+    var __m37 = (function(can, elements) {
 
         var processNodes = function(nodes, paths, location) {
             var frag = document.createDocumentFragment();
@@ -9507,7 +9691,7 @@
     })(__m2, __m24);
 
     // ## can/view/stache/utils.js
-    var __m38 = (function() {
+    var __m39 = (function() {
         return {
             // Returns if something looks like an array.  This works for can.List
             isArrayLike: function(obj) {
@@ -9548,7 +9732,7 @@
     })(__m2);
 
     // ## can/view/stache/mustache_helpers.js
-    var __m40 = (function(can, utils, live) {
+    var __m41 = (function(can, utils, live) {
         live = live || can.view.live;
 
         var resolve = function(value) {
@@ -9687,10 +9871,10 @@
             }
         };
 
-    })(__m2, __m38, __m26);
+    })(__m2, __m39, __m26);
 
     // ## can/view/stache/mustache_core.js
-    var __m39 = (function(can, utils, mustacheHelpers, live, elements, Scope, nodeLists) {
+    var __m40 = (function(can, utils, mustacheHelpers, live, elements, Scope, nodeLists) {
 
         live = live || can.view.live;
         elements = elements || can.view.elements;
@@ -10245,10 +10429,10 @@
 
 
         return core;
-    })(__m2, __m38, __m40, __m26, __m24, __m22, __m27);
+    })(__m2, __m39, __m41, __m26, __m24, __m22, __m27);
 
     // ## can/view/stache/html_section.js
-    var __m37 = (function(can, target, utils, mustacheCore) {
+    var __m38 = (function(can, target, utils, mustacheCore) {
 
 
         var decodeHTML = (function() {
@@ -10389,10 +10573,10 @@
 
         return HTMLSectionBuilder;
 
-    })(__m2, __m36, __m38, __m39);
+    })(__m2, __m37, __m39, __m40);
 
     // ## can/view/stache/text_section.js
-    var __m41 = (function(can, live, utils) {
+    var __m42 = (function(can, live, utils) {
         live = live || can.view.live;
 
         var TextSectionBuilder = function() {
@@ -10495,10 +10679,10 @@
             });
 
         return TextSectionBuilder;
-    })(__m2, __m26, __m38);
+    })(__m2, __m26, __m39);
 
     // ## can/view/stache/stache.js
-    var __m35 = (function(can, parser, target, HTMLSectionBuilder, TextSectionBuilder, mustacheCore, mustacheHelpers, viewCallbacks) {
+    var __m36 = (function(can, parser, target, HTMLSectionBuilder, TextSectionBuilder, mustacheCore, mustacheHelpers, viewCallbacks) {
 
         // Make sure that we can also use our modules with Stache as a plugin
         parser = parser || can.view.parser;
@@ -10822,10 +11006,10 @@
         };
 
         return stache;
-    })(__m2, __m28, __m36, __m37, __m41, __m39, __m40, __m9);
+    })(__m2, __m28, __m37, __m38, __m42, __m40, __m41, __m9);
 
     // ## can/route/pushstate/pushstate.js
-    var __m42 = (function(can) {
+    var __m43 = (function(can) {
         "use strict";
 
         // Initialize plugin only if browser supports pushstate.
@@ -10967,7 +11151,7 @@
     })(__m2, __m31);
 
     // ## can/util/object/object.js
-    var __m45 = (function(can) {
+    var __m46 = (function(can) {
         var isArray = can.isArray;
 
         can.Object = {};
@@ -11080,7 +11264,7 @@
     })(__m2);
 
     // ## can/map/backup/backup.js
-    var __m44 = (function(can) {
+    var __m45 = (function(can) {
         var flatProps = function(a, cur) {
             var obj = {};
             for (var prop in a) {
@@ -11110,10 +11294,10 @@
                 }
             });
         return can.Map;
-    })(__m2, __m15, __m45);
+    })(__m2, __m15, __m46);
 
     // ## can/model/queue/queue.js
-    var __m43 = (function(can) {
+    var __m44 = (function(can) {
         var cleanAttrs = function(changedAttrs, attrs) {
             var newAttrs = can.extend(true, {}, attrs),
                 current, path;
@@ -11252,10 +11436,10 @@
                 }
             });
         return can;
-    })(__m2, __m30, __m44);
+    })(__m2, __m30, __m45);
 
     // ## can/construct/super/super.js
-    var __m46 = (function(can, Construct) {
+    var __m47 = (function(can, Construct) {
         // tests if we can get super in .toString()
         var isFunction = can.isFunction,
             fnTest = /xyz/.test(function() {
@@ -11301,8 +11485,922 @@
         return can;
     })(__m2, __m12);
 
+    // ## can/construct/proxy/proxy.js
+    var __m48 = (function(can, Construct) {
+        var isFunction = can.isFunction,
+            isArray = can.isArray,
+            makeArray = can.makeArray,
+            proxy = function(funcs) {
+                //args that should be curried
+                var args = makeArray(arguments),
+                    self;
+                // get the functions to callback
+                funcs = args.shift();
+                // if there is only one function, make funcs into an array
+                if (!isArray(funcs)) {
+                    funcs = [funcs];
+                }
+                // keep a reference to us in self
+                self = this;
+
+
+
+                return function class_cb() {
+                    // add the arguments after the curried args
+                    var cur = args.concat(makeArray(arguments)),
+                        isString, length = funcs.length,
+                        f = 0,
+                        func;
+                    // go through each function to call back
+                    for (; f < length; f++) {
+                        func = funcs[f];
+                        if (!func) {
+                            continue;
+                        }
+                        // set called with the name of the function on self (this is how this.view works)
+                        isString = typeof func === 'string';
+                        // call the function
+                        cur = (isString ? self[func] : func)
+                            .apply(self, cur || []);
+                        // pass the result to the next function (if there is a next function)
+                        if (f < length - 1) {
+                            cur = !isArray(cur) || cur._use_call ? [cur] : cur;
+                        }
+                    }
+                    return cur;
+                };
+            };
+        can.Construct.proxy = can.Construct.prototype.proxy = proxy;
+        // this corrects the case where can/control loads after can/construct/proxy, so static props don't have proxy
+        var correctedClasses = [
+            can.Map,
+            can.Control,
+            can.Model
+        ],
+            i = 0;
+        for (; i < correctedClasses.length; i++) {
+            if (correctedClasses[i]) {
+                correctedClasses[i].proxy = proxy;
+            }
+        }
+        return can;
+    })(__m2, __m12);
+
+    // ## can/map/lazy/bubble.js
+    var __m50 = (function(can) {
+        var bubble = can.bubble;
+
+        return can.extend({}, bubble, {
+                childrenOf: function(parentMap, eventName) {
+                    if (parentMap._nestedReference) {
+                        parentMap._nestedReference.each(function(child, ref) {
+                            if (child && child.bind) {
+                                bubble.toParent(child, parentMap, ref(), eventName);
+                            }
+                        });
+                    } else {
+                        bubble._each.apply(this, arguments);
+                    }
+                }
+            });
+    })(__m2, __m17);
+
+    // ## can/map/lazy/nested_reference.js
+    var __m51 = (function(can) {
+
+        // iterates through `propPath`
+        // and calls `callback` with current object and path part
+        var pathIterator = function(root, propPath, callback) {
+            var props = propPath.split("."),
+                cur = root,
+                part;
+            while (part = props.shift()) {
+                cur = cur[part];
+                if (callback) {
+                    callback(cur, part);
+                }
+            }
+            return cur;
+        };
+
+        // has `array` and `item` props, toString() returns item's index in `array`
+        var ArrIndex = function(array) {
+            this.array = array;
+        };
+        ArrIndex.prototype.toString = function() {
+            return "" + can.inArray(this.item, this.array);
+        };
+
+        // `root` points to actual data
+        // `references` keeps path functions to certain nodes within `root`
+        var NestedReference = function(root) {
+            this.root = root;
+            this.references = [];
+        };
+
+        NestedReference.ArrIndex = ArrIndex;
+
+        can.extend(NestedReference.prototype, {
+
+                // pushes path func to `references`
+                make: function(propPath) {
+                    var path = [], // holds path elements
+                        arrIndex;
+
+                    if (can.isArray(this.root) || this.root instanceof can.LazyList) {
+                        arrIndex = new ArrIndex(this.root);
+                    }
+
+                    // iter through `propPath` and keep path elements in `path`
+                    pathIterator(this.root, propPath, function(item, prop) {
+                        if (arrIndex) {
+                            arrIndex.item = item;
+                            path.push(arrIndex);
+                            arrIndex = undefined;
+                        } else {
+                            path.push(prop);
+                            if (can.isArray(item)) {
+                                arrIndex = new ArrIndex(item);
+                            }
+                        }
+                    });
+
+                    // finally push path func to references and return
+                    var pathFunc = function() {
+                        return path.join(".");
+                    };
+
+                    this.references.push(pathFunc);
+                    return pathFunc;
+                },
+
+                // removes all references that starts with `path`
+                // calls `callback` with object on the current path and path itself
+                removeChildren: function(path, callback) {
+                    var i = 0;
+                    while (i < this.references.length) {
+                        var reference = this.references[i]();
+                        if (reference.indexOf(path) === 0) {
+                            callback(this.get(reference), reference);
+                            this.references.splice(i, 1);
+                        } else {
+                            i++;
+                        }
+                    }
+                },
+
+                // returns node on the `path`
+                get: function(path) {
+                    return pathIterator(this.root, path);
+                },
+
+                // iterates through references and calls `callback`
+                // with actual object, path func and path
+                each: function(callback) {
+                    var self = this;
+                    can.each(this.references, function(ref) {
+                        var path = ref();
+                        callback(self.get(path), ref, path);
+                    });
+                }
+
+            });
+
+        // expose
+        can.NestedReference = NestedReference;
+    })(__m2);
+
+    // ## can/map/lazy/lazy.js
+    var __m49 = (function(can, bubble) {
+
+        can.LazyMap = can.Map.extend({
+                _bubble: bubble
+            }, {
+                setup: function(obj) {
+                    this.constructor.Map = this.constructor;
+                    this.constructor.List = can.LazyList;
+
+                    // `_data` is where we keep the properties.
+                    this._data = can.extend(can.extend(true, {}, this.constructor.defaults || {}), obj);
+
+                    // The namespace this `object` uses to listen to events.
+                    can.cid(this, ".lazyMap");
+                    // Sets all `attrs`.
+                    this._init = 1;
+                    this._computedBindings = {};
+                    this._setupComputes();
+                    var teardownMapping = obj && can.Map.helpers.addToMap(obj, this);
+
+                    // keep references to Observes in `_data`
+                    this._nestedReference = new can.NestedReference(this._data);
+
+                    if (teardownMapping) {
+                        teardownMapping();
+                    }
+
+                    // Make the data directly accessible (if possible)
+                    can.each(this._data, can.proxy(function(value, prop) {
+                                this.___set(prop, value);
+                            }, this));
+                    this.bind('change', can.proxy(this._changes, this));
+
+                    delete this._init;
+                },
+
+                // todo: function should be renamed
+                _addChild: function(path, newChild, setNewChild) {
+                    var self = this;
+
+                    // remove 'old' references that are starting with `path` and do rewiring
+                    this._nestedReference.removeChildren(path, function(oldChild, oldChildPath) {
+                        // unhook every current child on path
+                        bubble.remove(self, oldChild);
+
+                        // if `newChild` passed bind it to every child and make references (1st step: rewiring to bottom/children)
+                        if (newChild) {
+                            var newChildPath = oldChildPath.replace(path + ".", "");
+
+                            // check if we are replacing existing observe or inserting new one
+                            if (path === newChildPath) {
+                                oldChild._nestedReference.each(function(obj, path) {
+                                    newChild._nestedReference.make(path());
+                                    if (self._bindings) {
+                                        bubble.add(this, newChild, path());
+                                    }
+                                });
+                            } else {
+                                var reference = newChild._nestedReference.make(newChildPath);
+                                if (self._bindings) {
+                                    bubble.add(oldChild, newChild, reference());
+                                }
+                            }
+
+                        }
+                    });
+
+                    // callback
+                    if (setNewChild) {
+                        setNewChild();
+                    }
+
+                    // bind parent on `newChild` and make reference (2st step: rewiring to top/parent)
+                    if (newChild) {
+                        var reference = this._nestedReference.make(path);
+                        if (this._bindings) {
+                            bubble.add(this, newChild, reference());
+                        }
+                    }
+                    return newChild;
+                },
+
+                removeAttr: function(attr) {
+                    var data = this._goto(attr);
+
+                    // if there are more attr parts remaining, it means we
+                    // hit an internal observable
+                    if (data.parts.length) {
+                        // ask that observable to remove the attr
+                        return data.value.removeAttr(data.parts.join("."));
+                    } else {
+                        // otherwise, are we removing a property from an array
+                        if (can.isArray(data.parent)) {
+                            data.parent.splice(data.prop, 1);
+                            this._triggerChange(attr, "remove", undefined, [this.__type(data.value, data.prop)]);
+                        } else {
+                            // do not trigger if prop does not exists
+                            if (data.parent[data.prop]) {
+                                delete data.parent[data.prop];
+                                can.batch.trigger(this, data.path.length ? data.path.join(".") + ".__keys" : "__keys");
+                                this._triggerChange(attr, "remove", undefined, this.__type(data.value, data.prop));
+                            }
+                        }
+                        // unhookup anything that was in here
+                        //this._addChild(attr); // --> CHECK THIS ONE! (previous bug was causing this to work even if it shouldn't,)
+                        // instead remove all references, do not unbind as _addChild does
+                        this._nestedReference.removeChildren();
+                        return data.value;
+                    }
+                },
+                // converts the value into an observable if needed
+                __type: function(value, prop) {
+                    // If we are getting an object.
+                    if (!(value instanceof can.LazyMap) && can.Map.helpers.canMakeObserve(value)) {
+
+                        if (can.isArray(value)) {
+                            var List = can.LazyList;
+                            return new List(value);
+                        } else {
+                            var Map = this.constructor.Map || can.LazyMap;
+                            return new Map(value);
+                        }
+                    }
+                    return value;
+                },
+                // walks to a property on the lazy map
+                // if it finds an object, uses [] to follow properties
+                // if it finds something else, it uses __get
+                _goto: function(attr, keepKey) {
+                    var parts = can.Map.helpers.attrParts(attr, keepKey).slice(0),
+                        prev,
+                        path = [],
+                        part;
+
+                    // are we dealing with list or map
+                    var cur = this instanceof can.List ? this[parts.shift()] : this.__get();
+
+                    // TODO we might also have to check for dot separated keys in each iteration
+                    while (cur && !can.Map.helpers.isObservable(cur) && parts.length) {
+                        if (part !== undefined) {
+                            path.push(part);
+                        }
+                        prev = cur;
+                        cur = cur[part = parts.shift()];
+                    }
+
+                    return {
+                        parts: parts,
+                        prop: part,
+                        value: cur,
+                        parent: prev,
+                        path: path
+                    };
+                },
+                // Reads a property from the `object`.
+                _get: function(attr) {
+                    var data = this._goto(attr);
+
+                    // if it's already observe return it
+                    if (can.Map.helpers.isObservable(data.value)) {
+                        if (data.parts.length) {
+                            return data.value._get(data.parts);
+                        } else {
+                            return data.value;
+                        }
+                    } else if (data.value && can.Map.helpers.canMakeObserve(data.value)) {
+                        // if object create LazyMap/LazyList
+                        var converted = this.__type(data.value, data.prop);
+                        // ... and replace it
+                        this._addChild(attr, converted, function() {
+                            data.parent[data.prop] = converted;
+                        });
+                        return converted;
+                    } else if (data.value !== undefined) {
+                        // Return if we have a value
+                        return data.value;
+                    } else {
+                        // Otherwise get it directly from this object
+                        return this.__get(attr);
+                    }
+                },
+                // Sets `attr` prop as value on this object where.
+                // `attr` - Is a string of properties or an array  of property values.
+                // `value` - The raw value to set.
+                _set: function(attr, value, keepKey) {
+                    var data = this._goto(attr, keepKey);
+                    if (can.Map.helpers.isObservable(data.value) && data.parts.length) {
+                        return data.value._set(data.parts, value);
+                    } else if (!data.parts.length) {
+                        this.__set(attr, value, data.value, data);
+                    } else {
+                        throw "can.LazyMap: object does not exist";
+                    }
+                },
+                __set: function(prop, value, current, data, convert) {
+                    // Otherwise, we are setting it on this `object`.
+                    // are we changing the value.
+
+                    // maybe not needed at all
+                    convert = convert || true;
+
+                    if (value !== current) {
+                        // Check if we are adding this for the first time --
+                        // if we are, we need to create an `add` event.
+
+                        var changeType = data.parent.hasOwnProperty(data.prop) ? "set" : "add";
+
+                        // if it is or should be a Lazy
+                        if (convert && can.Map.helpers.canMakeObserve(value)) {
+                            // make it a lazy
+                            value = this.__type(value, prop);
+                            var self = this;
+                            // hook up it's bindings
+                            this._addChild(prop, value, function() {
+                                // set the value
+                                self.___set(prop, value, data);
+                            });
+                        } else {
+                            // just set the value
+                            this.___set(prop, value, data);
+                        }
+
+                        if (changeType === "add") {
+                            // If there is no current value, let others know that
+                            // the the number of keys have changed
+
+                            can.batch.trigger(this, data.path.length ? data.path.join(".") + ".__keys" : "__keys", undefined);
+
+                        }
+                        // `batchTrigger` the change event.
+                        this._triggerChange(prop, changeType, value, current);
+                    }
+                },
+                // Directly sets a property on this `object`.
+                ___set: function(prop, val, data) {
+                    if (this[prop] && this[prop].isComputed && can.isFunction(this.constructor.prototype[prop])) {
+                        this[prop](val);
+                    } else if (data) {
+                        data.parent[data.prop] = val;
+                    } else {
+                        this._data[prop] = val;
+                    }
+
+                    // Add property directly for easy writing.
+                    // Check if its on the `prototype` so we don't overwrite methods like `attrs`.
+                    if (!(can.isFunction(this.constructor.prototype[prop]))) {
+                        this[prop] = val;
+                    }
+                },
+
+                _attrs: function(props, remove) {
+                    if (props === undefined) {
+                        return can.Map.helpers.serialize(this, 'attr', {});
+                    }
+
+                    props = can.extend({}, props);
+                    var self = this,
+                        prop,
+                        data,
+                        newVal;
+
+                    can.batch.start();
+
+                    // Update existing props
+                    this.each(function(curVal, prop) {
+                        newVal = props[prop];
+                        data = self._goto(prop, true);
+
+                        // remove existing prop and return if there is no new prop to merge and `remove` param exists
+                        if (newVal === undefined) {
+                            if (remove) {
+                                self.removeAttr(prop);
+                            }
+                            return;
+                        } else if (!can.Map.helpers.isObservable(curVal) && can.Map.helpers.canMakeObserve(curVal)) {
+                            // convert curVal to observe
+                            curVal = self.attr(prop);
+                        }
+
+                        if (self.__convert) {
+                            newVal = self.__convert(prop, newVal);
+                        }
+
+                        // if we're dealing with models, want to call _set to let converter run
+                        if (newVal instanceof can.Map) {
+                            self.__set(prop, newVal, curVal, data);
+                            // if its an object, let attr merge
+                        } else if (can.Map.helpers.isObservable(curVal) && can.Map.helpers.canMakeObserve(newVal) && curVal.attr) {
+                            curVal.attr(newVal, remove);
+                            // otherwise just set
+                        } else if (curVal !== newVal) {
+                            // OK till here
+                            self.__set(prop, newVal, curVal, data);
+                        }
+
+                        // delete passed prop after setting
+                        delete props[prop];
+                    });
+
+                    // add remaining props
+                    for (prop in props) {
+                        newVal = props[prop];
+                        this._set(prop, newVal, true);
+                    }
+
+                    can.batch.stop();
+                    return this;
+                }
+            });
+
+        can.LazyList = can.List.extend({
+                Map: can.LazyMap
+            }, {
+                setup: function() {
+                    can.List.prototype.setup.apply(this, arguments);
+                    this._nestedReference = new can.NestedReference(this);
+                }
+            });
+
+        return can.LazyMap;
+    })(__m2, __m50, __m15, __m19, __m51);
+
+    // ## can/map/delegate/delegate.js
+    var __m52 = (function(can) {
+        // ** - 'this' will be the deepest item changed
+        // * - 'this' will be any changes within *, but * will be the 
+        //     this returned
+        // tells if the parts part of a delegate matches the broken up props of the event
+        // gives the prop to use as 'this'
+        // - parts - the attribute name of the delegate split in parts ['foo','*']
+        // - props - the split props of the event that happened ['foo','bar','0']
+        // - returns - the attribute to delegate too ('foo.bar'), or null if not a match 
+        var delegateMatches = function(parts, props) {
+            //check props parts are the same or 
+            var len = parts.length,
+                i = 0,
+                // keeps the matched props we will use
+                matchedProps = [],
+                prop;
+            // if the event matches
+            for (i; i < len; i++) {
+                prop = props[i];
+                // if no more props (but we should be matching them)
+                // return null
+                if (typeof prop !== 'string') {
+                    return null;
+                } else // if we have a "**", match everything
+                if (parts[i] === '**') {
+                    return props.join('.');
+                } else // a match, but we want to delegate to "*"
+                if (parts[i] === '*') {
+                    // only do this if there is nothing after ...
+                    matchedProps.push(prop);
+                } else if (prop === parts[i]) {
+                    matchedProps.push(prop);
+                } else {
+                    return null;
+                }
+            }
+            return matchedProps.join('.');
+        },
+            // gets a change event and tries to figure out which
+            // delegates to call
+            delegateHandler = function(event, prop, how, newVal, oldVal) {
+                // pre-split properties to save some regexp time
+                var props = prop.split('.'),
+                    delegates = (this._observe_delegates || [])
+                        .slice(0),
+                    delegate, attr, matchedAttr, hasMatch, valuesEqual;
+                event.attr = prop;
+                event.lastAttr = props[props.length - 1];
+                // for each delegate
+                for (var i = 0; delegate = delegates[i++];) {
+                    // if there is a batchNum, this means that this
+                    // event is part of a series of events caused by a single 
+                    // attrs call.  We don't want to issue the same event
+                    // multiple times
+                    // setting the batchNum happens later
+                    if (event.batchNum && delegate.batchNum === event.batchNum || delegate.undelegated) {
+                        continue;
+                    }
+                    // reset match and values tests
+                    hasMatch = undefined;
+                    valuesEqual = true;
+                    // yeah, all this under here has to be redone v
+                    // for each attr in a delegate
+                    for (var a = 0; a < delegate.attrs.length; a++) {
+                        attr = delegate.attrs[a];
+                        matchedAttr = delegateMatches(attr.parts, props);
+                        // check if it is a match
+                        if (matchedAttr) {
+                            hasMatch = matchedAttr;
+                        }
+                        // if it has a value, make sure it's the right value
+                        // if it's set, we should probably check that it has a 
+                        // value no matter what
+                        if (attr.value && valuesEqual) {
+                            valuesEqual = attr.value === '' + this.attr(attr.attr);
+                        } else if (valuesEqual && delegate.attrs.length > 1) {
+                            // if there are multiple attributes, each has to at
+                            // least have some value
+                            valuesEqual = this.attr(attr.attr) !== undefined;
+                        }
+                    }
+                    // if there is a match and valuesEqual ... call back
+                    if (hasMatch && valuesEqual) {
+                        // how to get to the changed property from the delegate
+                        var from = prop.replace(hasMatch + '.', '');
+                        // if this event is part of a batch, set it on the delegate
+                        // to only send one event
+                        if (event.batchNum) {
+                            delegate.batchNum = event.batchNum;
+                        }
+                        // if we listen to change, fire those with the same attrs
+                        // TODO: the attrs should probably be using from
+                        if (delegate.event === 'change') {
+                            prop = from;
+                            event.curAttr = hasMatch;
+                            delegate.callback.apply(this.attr(hasMatch), can.makeArray(arguments));
+                        } else if (delegate.event === how) {
+                            // if it's a match, callback with the location of the match
+                            delegate.callback.apply(this.attr(hasMatch), [
+                                    event,
+                                    newVal,
+                                    oldVal,
+                                    from
+                                ]);
+                        } else if (delegate.event === 'set' && how === 'add') {
+                            // if we are listening to set, we should also listen to add
+                            delegate.callback.apply(this.attr(hasMatch), [
+                                    event,
+                                    newVal,
+                                    oldVal,
+                                    from
+                                ]);
+                        }
+                    }
+                }
+            };
+        can.extend(can.Map.prototype, {
+                delegate: function(selector, event, handler) {
+                    selector = can.trim(selector);
+                    var delegates = this._observe_delegates || (this._observe_delegates = []),
+                        attrs = [],
+                        selectorRegex = /([^\s=,]+)(?:=("[^",]*"|'[^',]*'|[^\s"',]*))?(,?)\s*/g,
+                        matches;
+                    // parse each property in the selector
+                    while ((matches = selectorRegex.exec(selector)) !== null) {
+                        // we need to do a little doctoring to make up for the quotes.
+                        if (matches[2] && can.inArray(matches[2].substr(0, 1), [
+                                    '"',
+                                    '\''
+                                ]) >= 0) {
+                            matches[2] = matches[2].substr(1, -1);
+                        }
+                        attrs.push({
+                                // the attribute name
+                                attr: matches[1],
+                                // the attribute name, pre-split for speed
+                                parts: matches[1].split('.'),
+                                // the value associated with this property (if there was one given)
+                                value: matches[2],
+                                // whether this selector combines with the one after it with AND or OR
+                                or: matches[3] === ','
+                            });
+                    }
+                    // delegates has pre-processed info about the event
+                    delegates.push({
+                            // the attrs name for unbinding
+                            selector: selector,
+                            // an object of attribute names and values {type: 'recipe',id: undefined}
+                            // undefined means a value was not defined
+                            attrs: attrs,
+                            callback: handler,
+                            event: event
+                        });
+                    if (delegates.length === 1) {
+                        this.bind('change', delegateHandler);
+                    }
+                    return this;
+                },
+                undelegate: function(selector, event, handler) {
+                    selector = selector && can.trim(selector);
+                    var i = 0,
+                        delegates = this._observe_delegates || [],
+                        delegateOb;
+                    if (selector) {
+                        while (i < delegates.length) {
+                            delegateOb = delegates[i];
+                            if (delegateOb.callback === handler || !handler && delegateOb.selector === selector) {
+                                delegateOb.undelegated = true;
+                                delegates.splice(i, 1);
+                            } else {
+                                i++;
+                            }
+                        }
+                    } else {
+                        // remove all delegates
+                        delegates = [];
+                    }
+                    if (!delegates.length) {
+                        //can.removeData(this, "_observe_delegates");
+                        this.unbind('change', delegateHandler);
+                    }
+                    return this;
+                }
+            });
+        // add helpers for testing .. 
+        can.Map.prototype.delegate.matches = delegateMatches;
+        return can.Map;
+    })(__m2, __m15);
+
+    // ## can/map/setter/setter.js
+    var __m53 = (function(can) {
+
+        can.classize = function(s, join) {
+            // this can be moved out ..
+            // used for getter setter
+            var parts = s.split(can.undHash),
+                i = 0;
+            for (; i < parts.length; i++) {
+                parts[i] = can.capitalize(parts[i]);
+            }
+            return parts.join(join || '');
+        };
+        var classize = can.classize,
+            proto = can.Map.prototype,
+            old = proto.__set;
+        proto.__set = function(prop, value, current, success, error) {
+
+
+            // check if there's a setter
+            var cap = classize(prop),
+                setName = 'set' + cap,
+                errorCallback = function(errors) {
+
+
+                    var stub = error && error.call(self, errors);
+                    // if 'validations' is on the page it will trigger
+                    // the error itself and we dont want to trigger
+                    // the event twice. :)
+                    if (stub !== false) {
+                        can.trigger(self, 'error', [
+                                prop,
+                                errors
+                            ], true);
+                    }
+                    return false;
+                }, self = this;
+
+
+
+            // if we have a setter
+            if (this[setName]) {
+                // call the setter, if returned value is undefined,
+                // this means the setter is async so we
+                // do not call update property and return right away
+                can.batch.start();
+
+                value = this[setName](value, function(value) {
+                    old.call(self, prop, value, current, success, errorCallback);
+
+                }, errorCallback);
+
+
+                if (value === undefined) {
+
+                    can.batch.stop();
+                    return;
+                } else {
+                    old.call(self, prop, value, current, success, errorCallback);
+                    can.batch.stop();
+                    return this;
+                }
+
+            } else {
+                old.call(self, prop, value, current, success, errorCallback);
+            }
+
+            return this;
+        };
+        return can.Map;
+    })(__m2, __m15);
+
+    // ## can/map/attributes/attributes.js
+    var __m54 = (function(can, Map) {
+
+
+
+        can.each([
+                can.Map,
+                can.Model
+            ], function(clss) {
+
+                // in some cases model might not be defined quite yet.
+                if (clss === undefined) {
+                    return;
+                }
+                var isObject = function(obj) {
+                    return typeof obj === 'object' && obj !== null && obj;
+                };
+                can.extend(clss, {
+
+                        attributes: {},
+
+                        convert: {
+                            'date': function(str) {
+                                var type = typeof str;
+                                if (type === 'string') {
+                                    str = Date.parse(str);
+                                    return isNaN(str) ? null : new Date(str);
+                                } else if (type === 'number') {
+                                    return new Date(str);
+                                } else {
+                                    return str;
+                                }
+                            },
+                            'number': function(val) {
+                                return parseFloat(val);
+                            },
+                            'boolean': function(val) {
+                                if (val === 'false' || val === '0' || !val) {
+                                    return false;
+                                }
+                                return true;
+                            },
+                            'default': function(val, oldVal, error, type) {
+                                // Convert can.Model types using .model and .models
+                                if (can.Map.prototype.isPrototypeOf(type.prototype) && typeof type.model === 'function' && typeof type.models === 'function') {
+                                    return type[can.isArray(val) ? 'models' : 'model'](val);
+                                }
+                                if (can.Map.prototype.isPrototypeOf(type.prototype)) {
+                                    if (can.isArray(val) && typeof type.List === 'function') {
+                                        return new type.List(val);
+                                    }
+                                    return new type(val);
+                                }
+                                if (typeof type === 'function') {
+                                    return type(val, oldVal);
+                                }
+                                var construct = can.getObject(type),
+                                    context = window,
+                                    realType;
+                                // if type has a . we need to look it up
+                                if (type.indexOf('.') >= 0) {
+                                    // get everything before the last .
+                                    realType = type.substring(0, type.lastIndexOf('.'));
+                                    // get the object before the last .
+                                    context = can.getObject(realType);
+                                }
+                                return typeof construct === 'function' ? construct.call(context, val, oldVal) : val;
+                            }
+                        },
+                        serialize: {
+                            'default': function(val, type) {
+                                return isObject(val) && val.serialize ? val.serialize() : val;
+                            },
+                            'date': function(val) {
+                                return val && val.getTime();
+                            }
+                        }
+                    });
+                // overwrite setup to do this stuff
+                var oldSetup = clss.setup;
+
+                clss.setup = function(superClass, stat, proto) {
+                    var self = this;
+                    oldSetup.call(self, superClass, stat, proto);
+                    can.each(['attributes'], function(name) {
+                        if (!self[name] || superClass[name] === self[name]) {
+                            self[name] = {};
+                        }
+                    });
+                    can.each([
+                            'convert',
+                            'serialize'
+                        ], function(name) {
+                            if (superClass[name] !== self[name]) {
+                                self[name] = can.extend({}, superClass[name], self[name]);
+                            }
+                        });
+                };
+            });
+
+        can.Map.prototype.__convert = function(prop, value) {
+            // check if there is a
+            var Class = this.constructor,
+                oldVal = this.__get(prop),
+                type, converter;
+            if (Class.attributes) {
+                // the type of the attribute
+                type = Class.attributes[prop];
+                converter = Class.convert[type] || Class.convert['default'];
+            }
+            return value === null || !type ? value : converter.call(Class, value, oldVal, function() {}, type);
+        };
+
+        var oldSerialize = can.Map.helpers._serialize;
+        can.Map.helpers._serialize = function(map, name, val) {
+
+            var constructor = map.constructor,
+                type = constructor.attributes ? constructor.attributes[name] : 0,
+                converter = constructor.serialize ? constructor.serialize[type] : 0;
+
+            return val && typeof val.serialize === 'function' ?
+            // call attrs or serialize to get the original data back
+            oldSerialize.apply(this, arguments) :
+            // otherwise if we have  a converter
+            converter ?
+            // use the converter
+            converter(val, type) :
+            // or return the val
+            oldSerialize.apply(this, arguments);
+        };
+        // add support for single value serialize
+        var mapSerialize = can.Map.prototype.serialize;
+        can.Map.prototype.serialize = function(attrName) {
+            var baseResult = mapSerialize.apply(this, arguments);
+            if (attrName) {
+                return baseResult[attrName];
+            } else {
+                return baseResult;
+            }
+        };
+
+        return can.Map;
+    })(__m2, __m15, __m19);
+
     // ## can/map/validations/validations.js
-    var __m47 = (function(can) {
+    var __m55 = (function(can) {
         //validations object is by property.  You can have validations that
         //span properties, but this way we know which ones to run.
         //  proc should return true if there's an error or the error message
@@ -11482,7 +12580,7 @@
     })(__m2, __m15);
 
     // ## can/map/list/list.js
-    var __m48 = (function(can) {
+    var __m56 = (function(can) {
         can.extend(can.List.prototype, {
                 filter: function(callback) {
                     // The filtered list
@@ -11567,8 +12665,288 @@
         return can.List;
     })(__m2, __m15, __m19, __m20);
 
+    // ## can/map/define/define.js
+    var __m57 = (function(can) {
+
+        can.Map.helpers.define = function(Map) {
+            var define = Map.prototype.define;
+
+            Map.defaultGenerators = {};
+            for (var prop in define) {
+                if ("value" in define[prop]) {
+                    if (typeof define[prop].value === "function") {
+                        Map.defaultGenerators[prop] = define[prop].value;
+                    } else {
+                        Map.defaults[prop] = define[prop].value;
+                    }
+                }
+                if (typeof define[prop].Value === "function") {
+                    (function(Constructor) {
+                        Map.defaultGenerators[prop] = function() {
+                            return new Constructor();
+                        };
+                    })(define[prop].Value);
+                }
+            }
+        };
+
+        var oldSetupDefaults = can.Map.prototype._setupDefaults;
+        can.Map.prototype._setupDefaults = function(obj) {
+            var defaults = oldSetupDefaults.call(this),
+                propsCommittedToAttr = {},
+                Map = this.constructor,
+                originalGet = this._get;
+
+            // Overwrite this._get with a version that commits defaults to
+            // this.attr() as needed. Because calling this.attr() for each individual
+            // default would be expensive.
+            this._get = function(originalProp) {
+
+                // If a this.attr() was called using dot syntax (e.g number.0),
+                // disregard everything after the "." until we call the
+                // original this._get().
+                prop = (originalProp.indexOf('.') !== -1 ?
+                    originalProp.substr(0, originalProp.indexOf('.')) :
+                    prop);
+
+                // If this property has a default and we haven't yet committed it to
+                // this.attr()
+                if ((prop in defaults) && !(prop in propsCommittedToAttr)) {
+
+                    // Commit the property's default so that it can be read in
+                    // other defaultGenerators.
+                    this.attr(prop, defaults[prop]);
+
+                    // Make not so that we don't commit this property again.
+                    propsCommittedToAttr[prop] = true;
+                }
+
+                return originalGet.apply(this, arguments);
+            };
+
+            for (var prop in Map.defaultGenerators) {
+                // Only call the prop's value method if the property wasn't provided
+                // during instantiation.
+                if (!obj || !(prop in obj)) {
+                    defaults[prop] = Map.defaultGenerators[prop].call(this);
+                }
+            }
+
+            // Replace original this.attr
+            this._get = originalGet;
+
+            return defaults;
+        };
+
+        var proto = can.Map.prototype,
+            oldSet = proto.__set;
+        proto.__set = function(prop, value, current, success, error) {
+
+
+            // check if there's a setter
+            var errorCallback = function(errors) {
+
+
+                var stub = error && error.call(self, errors);
+                // if 'validations' is on the page it will trigger
+                // the error itself and we dont want to trigger
+                // the event twice. :)
+                if (stub !== false) {
+                    can.trigger(self, 'error', [
+                            prop,
+                            errors
+                        ], true);
+                }
+                return false;
+            },
+                self = this,
+                define = this.define && this.define[prop],
+                setter = define && define.set,
+                getter = define && define.get;
+
+            // if we have a setter
+            if (setter) {
+                // call the setter, if returned value is undefined,
+                // this means the setter is async so we
+                // do not call update property and return right away
+                can.batch.start();
+                var setterCalled = false,
+
+                    setValue = setter.call(this, value, function(value) {
+                        oldSet.call(self, prop, value, current, success, errorCallback);
+                        setterCalled = true;
+
+                    }, errorCallback);
+                if (getter) {
+                    // if there's a getter we do nothing
+                    can.batch.stop();
+                    return;
+                }
+                // if it took a setter and returned nothing, don't set the value
+                else if (setValue === undefined && !setterCalled && setter.length >= 2) {
+
+                    can.batch.stop();
+                    return;
+                } else {
+                    if (!setterCalled) {
+                        oldSet.call(self, prop,
+                            // if no arguments, we are side-effects only
+                            setter.length === 0 && setValue === undefined ? value : setValue,
+                            current,
+                            success,
+                            errorCallback);
+                    }
+                    can.batch.stop();
+                    return this;
+                }
+
+            } else {
+                oldSet.call(self, prop, value, current, success, errorCallback);
+            }
+
+            return this;
+        };
+
+        var converters = {
+            'date': function(str) {
+                var type = typeof str;
+                if (type === 'string') {
+                    str = Date.parse(str);
+                    return isNaN(str) ? null : new Date(str);
+                } else if (type === 'number') {
+                    return new Date(str);
+                } else {
+                    return str;
+                }
+            },
+            'number': function(val) {
+                return +(val);
+            },
+            'boolean': function(val) {
+                if (val === 'false' || val === '0' || !val) {
+                    return false;
+                }
+                return true;
+            },
+            '*': function(val) {
+                return val;
+            },
+            'string': function(val) {
+                return '' + val;
+            }
+        };
+
+        // the old type sets up bubbling
+        var oldType = proto.__type;
+        proto.__type = function(value, prop) {
+            var def = this.define && this.define[prop],
+                type = def && def.type,
+                Type = def && def.Type,
+                newValue = value;
+
+            if (typeof type === "string") {
+                type = converters[type];
+            }
+
+            if (type || Type) {
+                // If there's a type, convert it.
+                if (type) {
+                    newValue = type.call(this, newValue, prop);
+                }
+                // If there's a Type create a new instance of it
+                if (Type && !(newValue instanceof Type)) {
+                    newValue = new Type(newValue);
+                }
+                // If the newValue is a Map, we need to hook it up
+                return newValue;
+
+            }
+            return oldType.call(this, newValue, prop);
+        };
+
+        var oldRemove = proto._remove;
+        proto._remove = function(prop, current) {
+            var remove = this.define && this.define[prop] && this.define[prop].remove,
+                res;
+            if (remove) {
+                can.batch.start();
+                res = remove.call(this, current);
+
+                if (res === false) {
+                    can.batch.stop();
+                    return;
+                } else {
+
+                    res = oldRemove.call(this, prop, current);
+                    can.batch.stop();
+                    return res;
+                }
+            }
+            return oldRemove.call(this, prop, current);
+        };
+
+        var oldSetupComputes = proto._setupComputes;
+        proto._setupComputes = function(defaultsValues) {
+            oldSetupComputes.apply(this, arguments);
+            for (var attr in this.define) {
+                var def = this.define[attr],
+                    get = def.get;
+                if (get) {
+                    this[attr] = can.compute.async(defaultsValues[attr], get, this);
+                    this._computedBindings[attr] = {
+                        count: 0
+                    };
+                }
+            }
+        };
+        // Overwrite the invidual property serializer b/c we will overwrite it.
+        var oldSingleSerialize = can.Map.helpers._serialize;
+        can.Map.helpers._serialize = function(map, name, val) {
+            return serializeProp(map, name, val);
+        };
+        // If the map has a define serializer for the given attr, run it.
+        var serializeProp = function(map, attr, val) {
+            var serializer = map.define && map.define[attr] && map.define[attr].serialize;
+            if (serializer === undefined) {
+                return oldSingleSerialize.apply(this, arguments);
+            } else if (serializer !== false) {
+                return typeof serializer === "function" ? serializer.call(map, val, attr) : oldSingleSerialize.apply(this, arguments);
+            }
+        };
+
+        // Overwrite serialize to add in any missing define serialized properties.
+        var oldSerialize = proto.serialize;
+        proto.serialize = function(property) {
+            var serialized = oldSerialize.apply(this, arguments);
+            if (property) {
+                return serialized;
+            }
+            // add in properties not already serialized
+
+            var serializer,
+                val;
+            // Go through each property.
+            for (var attr in this.define) {
+                // if it's not already defined
+                if (!(attr in serialized)) {
+                    // check there is a serializer so we aren't doing extra work on serializer:false
+                    serializer = this.define && this.define[attr] && this.define[attr].serialize;
+                    if (serializer) {
+                        val = serializeProp(this, attr, this.attr(attr));
+                        if (val !== undefined) {
+                            serialized[attr] = val;
+                        }
+                    }
+                }
+            }
+            return serialized;
+        };
+
+        return can.Map;
+    })(__m2, __m14);
+
     // ## can/map/sort/sort.js
-    var __m49 = (function(can) {
+    var __m58 = (function(can) {
 
         // Change bubble rule to bubble on change if their is a comparator
         var oldBubbleRule = can.List._bubbleRule;
@@ -11709,8 +13087,240 @@
         return can.Map;
     })(__m2, __m19);
 
+    // ## can/control/plugin/plugin.js
+    var __m59 = (function($, can) {
+        //used to determine if a control instance is one of controllers
+        //controllers can be strings or classes
+        var i, isAControllerOf = function(instance, controllers) {
+                var name = instance.constructor.pluginName || instance.constructor._shortName;
+                for (i = 0; i < controllers.length; i++) {
+                    if (typeof controllers[i] === 'string' ? name === controllers[i] : instance instanceof controllers[i]) {
+                        return true;
+                    }
+                }
+                return false;
+            }, makeArray = can.makeArray,
+            old = can.Control.setup;
+
+        can.Control.setup = function() {
+            // if you didn't provide a name, or are control, don't do anything
+            if (this !== can.Control) {
+
+                var pluginName = this.pluginName || this._fullName;
+                // create jQuery plugin
+                if (pluginName !== 'can_control') {
+                    this.plugin(pluginName);
+                }
+                old.apply(this, arguments);
+            }
+        };
+
+        $.fn.extend({
+
+
+                controls: function() {
+                    var controllerNames = makeArray(arguments),
+                        instances = [],
+                        controls, c;
+                    //check if arguments
+                    this.each(function() {
+                        controls = can.$(this)
+                            .data('controls');
+                        if (!controls) {
+                            return;
+                        }
+                        for (var i = 0; i < controls.length; i++) {
+                            c = controls[i];
+                            if (!controllerNames.length || isAControllerOf(c, controllerNames)) {
+                                instances.push(c);
+                            }
+                        }
+                    });
+                    return instances;
+                },
+
+
+                control: function(control) {
+                    return this.controls.apply(this, arguments)[0];
+                }
+            });
+        can.Control.plugin = function(pluginname) {
+            var control = this;
+            if (!$.fn[pluginname]) {
+                $.fn[pluginname] = function(options) {
+                    var args = makeArray(arguments),
+                        //if the arg is a method on this control
+                        isMethod = typeof options === 'string' && $.isFunction(control.prototype[options]),
+                        meth = args[0],
+                        returns;
+                    this.each(function() {
+                        //check if created
+                        var plugin = can.$(this)
+                            .control(control);
+                        if (plugin) {
+                            if (isMethod) {
+                                // call a method on the control with the remaining args
+                                returns = plugin[meth].apply(plugin, args.slice(1));
+                            } else {
+                                // call the plugin's update method
+                                plugin.update.apply(plugin, args);
+                            }
+                        } else {
+                            //create a new control instance
+                            control.newInstance.apply(control, [this].concat(args));
+                        }
+                    });
+                    return returns !== undefined ? returns : this;
+                };
+            }
+        };
+
+        can.Control.prototype.update = function(options) {
+            can.extend(this.options, options);
+            this.on();
+        };
+        return can;
+    })(jQuery, __m2, __m11);
+
+    // ## can/view/modifiers/modifiers.js
+    var __m60 = (function($, can) {
+        //---- ADD jQUERY HELPERS -----
+        //converts jquery functions to use views	
+        var convert, modify, isTemplate, isHTML, isDOM, getCallback,
+            // text and val cannot produce an element, so don't run hookups on them
+            noHookup = {
+                'val': true,
+                'text': true
+            };
+        convert = function(func_name) {
+            // save the old jQuery helper
+            var old = $.fn[func_name];
+            // replace it with our new helper
+            $.fn[func_name] = function() {
+                var args = can.makeArray(arguments),
+                    callbackNum, callback, self = this,
+                    result;
+                // if the first arg is a deferred
+                // wait until it finishes, and call
+                // modify with the result
+                if (can.isDeferred(args[0])) {
+                    args[0].done(function(res) {
+                        modify.call(self, [res], old);
+                    });
+                    return this;
+                } //check if a template
+                else if (isTemplate(args)) {
+                    // if we should operate async
+                    if (callbackNum = getCallback(args)) {
+                        callback = args[callbackNum];
+                        args[callbackNum] = function(result) {
+                            modify.call(self, [result], old);
+                            callback.call(self, result);
+                        };
+                        can.view.apply(can.view, args);
+                        return this;
+                    }
+                    // call view with args (there might be deferreds)
+                    result = can.view.apply(can.view, args);
+                    // if we got a string back
+                    if (!can.isDeferred(result)) {
+                        // we are going to call the old method with that string
+                        args = [result];
+                    } else {
+                        // if there is a deferred, wait until it is done before calling modify
+                        result.done(function(res) {
+                            modify.call(self, [res], old);
+                        });
+                        return this;
+                    }
+                }
+                return noHookup[func_name] ? old.apply(this, args) : modify.call(this, args, old);
+            };
+        };
+        // modifies the content of the element
+        // but also will run any hookup
+        modify = function(args, old) {
+            var res;
+            //check if there are new hookups
+            for (var hasHookups in can.view.hookups) {
+                break;
+            }
+            //if there are hookups, turn into a frag
+            // and insert that
+            // by using a frag, the element can be recursively hooked up
+            // before insterion
+            if (hasHookups && args[0] && isHTML(args[0])) {
+                args[0] = can.view.frag(args[0])
+                    .childNodes;
+            }
+            //then insert into DOM
+            res = old.apply(this, args);
+            return res;
+        };
+        // returns true or false if the args indicate a template is being used
+        // $('#foo').html('/path/to/template.ejs',{data})
+        // in general, we want to make sure the first arg is a string
+        // and the second arg is data
+        isTemplate = function(args) {
+            // save the second arg type
+            var secArgType = typeof args[1];
+            // the first arg is a string
+            return typeof args[0] === "string" &&
+            // the second arg is an object or function
+            (secArgType === 'object' || secArgType === 'function') &&
+            // but it is not a dom element
+            !isDOM(args[1]);
+        };
+        // returns true if the arg is a jQuery object or HTMLElement
+        isDOM = function(arg) {
+            return arg.nodeType || arg[0] && arg[0].nodeType;
+        };
+        // returns whether the argument is some sort of HTML data
+        isHTML = function(arg) {
+            if (isDOM(arg)) {
+                // if jQuery object or DOM node we're good
+                return true;
+            } else if (typeof arg === 'string') {
+                // if string, do a quick sanity check that we're HTML
+                arg = can.trim(arg);
+                return arg.substr(0, 1) === '<' && arg.substr(arg.length - 1, 1) === '>' && arg.length >= 3;
+            } else {
+                // don't know what you are
+                return false;
+            }
+        };
+        //returns the callback arg number if there is one (for async view use)
+        getCallback = function(args) {
+            return typeof args[3] === 'function' ? 3 : typeof args[2] === 'function' && 2;
+        };
+
+        $.fn.hookup = function() {
+            can.view.frag(this);
+            return this;
+        };
+        can.each([
+
+                "prepend",
+
+                "append",
+
+                "after",
+
+                "before",
+
+                "text",
+
+                "html",
+
+                "replaceWith", "val"
+            ], function(func) {
+                convert(func);
+            });
+        return can;
+    })(jQuery, __m2, __m10);
+
     // ## can/util/fixture/fixture.js
-    var __m50 = (function(can) {
+    var __m61 = (function(can) {
         // can.fixture relies on can.Object in order to work and needs to be
         // included before can.fixture in order to use it, otherwise it'll error.
         if (!can.Object) {
@@ -12411,7 +14021,7 @@
         can.fixture.overwrites = overwrites;
         can.fixture.make = can.fixture.store;
         return can.fixture;
-    })(__m2, __m13, __m45);
+    })(__m2, __m13, __m46);
 
     window['can'] = __m4;
 })();
